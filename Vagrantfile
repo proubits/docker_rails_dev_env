@@ -6,13 +6,14 @@ docker stop $(docker ps -a -q)
 docker rm $(docker ps -a -q)
 
 # Build containers from Dockerfiles
-docker build -t postgres /app/docker/postgres
-docker build -t rails /app
+docker build -t postgres /app/docker/postgres/
+docker build -t rubybox /app/docker/ruby/
+docker build -t rails /app/
 docker build -t redis /app/docker/redis/
 
 # Run and link the containers
 docker run -d --name postgres -e POSTGRESQL_USER=docker -e POSTGRESQL_PASS=docker postgres:latest
-docker run -d --name redis redis:latest
+docker run -d --name redis redis:latest /usr/bin/redis-server
 docker run -d -p 3000:3000 -v /app:/app --link redis:redis --link postgres:db --name rails rails:latest
 
 SCRIPT
@@ -42,7 +43,7 @@ Vagrant.configure("2") do |config|
   config.vm.network "forwarded_port", guest: 3000, host: 3000
 
   # Ubuntu
-  config.vm.box = "precise64"
+  config.vm.box = "phusion/ubuntu-14.04-amd64"
 
   # Install latest docker
   config.vm.provision "docker"
